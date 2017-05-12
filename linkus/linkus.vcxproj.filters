@@ -59,5 +59,11 @@
     <Image Include="res\linkus.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="res\star.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bg1.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

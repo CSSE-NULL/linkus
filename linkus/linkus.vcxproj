@@ -209,7 +209,9 @@
     <None Include="res\linkus.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\bg1.bmp" />
     <Image Include="res\linkus.ico" />
+    <Image Include="res\star.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

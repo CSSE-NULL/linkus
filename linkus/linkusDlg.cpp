@@ -64,6 +64,7 @@ BEGIN_MESSAGE_MAP(ClinkusDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_BTN_RELAX, &ClinkusDlg::OnBnClicked_BTN_RELAX)
 END_MESSAGE_MAP()
 
 
@@ -91,6 +92,7 @@ BOOL ClinkusDlg::OnInitDialog()
 			pSysMenu->AppendMenu(MF_SEPARATOR);
 			pSysMenu->AppendMenu(MF_STRING, IDM_ABOUTBOX, strAboutMenu);
 		}
+		InitBackground();
 	}
 
 	// 设置此对话框的图标。  当应用程序主窗口不是对话框时，框架将自动
@@ -141,6 +143,10 @@ void ClinkusDlg::OnPaint()
 	}
 	else
 	{
+		// 创建 CPaintDC 对象
+		CPaintDC dc(this);
+		// 绘制背景图片
+		dc.BitBlt(0, 0, 800, 600, &m_dcMem, 0, 0, SRCCOPY);
 		CDialogEx::OnPaint();
 	}
 }
@@ -152,3 +158,32 @@ HCURSOR ClinkusDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+void ClinkusDlg::InitBackground(void)
+{
+	CBitmap bmpMain;
+	bmpMain.LoadBitmapW(IDB_MAIN_BG);
+
+	// 获得当前对话框的视频内存
+	CClientDC dc(this);
+	// 创建与视频内存兼容的内存 DC
+	m_dcMem.CreateCompatibleDC(&dc);
+	// 将位图资源选入 DC
+	m_dcMem.SelectObject(bmpMain);
+
+	// 调整窗口大小
+	CRect rtWin;
+	CRect rtClient;
+	this->GetWindowRect(rtWin); // 获得窗口大小
+	this->GetClientRect(rtClient); // 获得客户区大小
+								   // 标题栏和外边框的大小
+	int nSpanWidth = rtWin.Width() - rtClient.Width();
+	int nSpanHeight = rtWin.Height() - rtClient.Height();
+	// 设置窗口大小
+	MoveWindow(0, 0, 800 + nSpanWidth, 600 + nSpanHeight);
+
+}
+
+void ClinkusDlg::OnBnClicked_BTN_RELAX()
+{
+	// TODO: 在此添加控件通知处理程序代码
+}

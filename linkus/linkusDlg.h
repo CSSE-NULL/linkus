@@ -24,11 +24,15 @@ public:
 // 实现
 protected:
 	HICON m_hIcon;
-
+	CDC m_dcMem;
 	// 生成的消息映射函数
 	virtual BOOL OnInitDialog();
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+	void InitBackground();
+
+public:
+	afx_msg void OnBnClicked_BTN_RELAX();
 };
