@@ -6,7 +6,7 @@
 #include "linkus.h"
 #include "linkusDlg.h"
 #include "afxdialogex.h"
-
+#include "GameDlg.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -64,7 +64,8 @@ BEGIN_MESSAGE_MAP(ClinkusDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_BTN_RELAX, &ClinkusDlg::OnBnClicked_BTN_RELAX)
+//	ON_BN_CLICKED(IDC_BTN_RELAX, &ClinkusDlg::OnBnClicked_BTN_RELAX)
+	ON_BN_CLICKED(IDC_BTN_BASIC, &ClinkusDlg::OnClickedBtnBasic)
 END_MESSAGE_MAP()
 
 
@@ -180,10 +181,21 @@ void ClinkusDlg::InitBackground(void)
 	int nSpanHeight = rtWin.Height() - rtClient.Height();
 	// 设置窗口大小
 	MoveWindow(0, 0, 800 + nSpanWidth, 600 + nSpanHeight);
-
+	CenterWindow();
 }
 
-void ClinkusDlg::OnBnClicked_BTN_RELAX()
+//void ClinkusDlg::OnBnClicked_BTN_RELAX()
+//{
+//	// TODO: 在此添加控件通知处理程序代码
+//}
+
+
+void ClinkusDlg::OnClickedBtnBasic()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	
+	CGameDlg dlg;
+	ShowWindow(SW_HIDE);
+	dlg.DoModal();
+	ShowWindow(SW_SHOW);
 }
+

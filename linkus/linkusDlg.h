@@ -32,7 +32,9 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
 	void InitBackground();
+	
 
 public:
-	afx_msg void OnBnClicked_BTN_RELAX();
+//	afx_msg void OnBnClicked_BTN_RELAX();
+	afx_msg void OnClickedBtnBasic();
 };
