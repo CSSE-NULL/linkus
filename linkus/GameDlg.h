@@ -27,6 +27,7 @@ protected:
 	CSize m_sizeElem; // 元素图片的大小
 	CRect m_rtGameRect; //游戏区域大小(该区域为游戏更新区域大小，考虑到后面画的线，可能会超出图片区域一定范围)
 	CGameControl m_GameC; // 游戏控制类
+	bool m_bFirstPoint;
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 	void  InitBackground();
 	DECLARE_MESSAGE_MAP()
@@ -37,5 +38,8 @@ public:
 	void UpdateWindow();
 	void InitElement();
 	void UpdateMap();
+	void DrawTipLine(Vertex asvPath[4], int nVexnum);
+	void DrawTipFrame(int nRow, int nCol);
 	afx_msg void OnClickedBtnStart();
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 };

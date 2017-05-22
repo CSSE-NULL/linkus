@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "linkus.h"
 #include "GameDlg.h"
+#include"GameControl.h"
 #include "afxdialogex.h"
 // CGameDlg 对话框
 
@@ -12,7 +13,16 @@ IMPLEMENT_DYNAMIC(CGameDlg, CDialogEx)
 CGameDlg::CGameDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(IDD_GAME_DIALOG, pParent)
 {
+	m_ptGameTop.x = 50;
+	m_ptGameTop.y = 50;
+	m_sizeElem.cx = 40;
+	m_sizeElem.cy = 40;
+	m_rtGameRect.left = 45;
+	m_rtGameRect.top = 45;
+	m_rtGameRect.right = 695;
+	m_rtGameRect.bottom = 455;
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
+	m_bFirstPoint = true;
 }
 
 CGameDlg::~CGameDlg()
@@ -28,6 +38,7 @@ void CGameDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CGameDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_BN_CLICKED(IDC_BTN_START, &CGameDlg::OnClickedBtnStart)
+	ON_WM_LBUTTONUP()
 END_MESSAGE_MAP()
 
 
@@ -41,9 +52,10 @@ void CGameDlg::InitBackground(void)
 	CClientDC dc(this);
 	// 创建与视频内存兼容的内存 DC
 	m_dcMem.CreateCompatibleDC(&dc);
+	m_dcBG.CreateCompatibleDC(&dc);
 	// 将位图资源选入 DC
 	m_dcMem.SelectObject(bmpMain);
-
+	m_dcBG.SelectObject(bmpMain);
 	// 调整窗口大小
 	CRect rtWin;
 	CRect rtClient;
@@ -150,16 +162,21 @@ void CGameDlg::UpdateMap(void)
 	//获取行数和列数
 	int nRows = CGameControl::s_nRows;
 	int nCols = CGameControl::s_nCols;
-	int nElemH = 40;
-	int nElemW = 40;
-	int nLeft = 20;
-	int nTop = 50;
+	int nElemH = m_sizeElem.cy;
+	int nElemW = m_sizeElem.cx;
+	int nLeft = m_ptGameTop.x;
+	int nTop = m_ptGameTop.y;
 	for (int i = 0; i < nRows; i++)
 	{
 		for (int j = 0; j < nCols; j++)
 		{
 			// 得到图片编号的值
 			int nElemVal = m_GameC.GetElement(i, j);
+			if (nElemVal == BLANK) {
+				m_dcMem.BitBlt(nLeft + j * nElemW, nTop + i * nElemH, nElemW, nElemH,
+					&m_dcBG, 0, 0, WHITENESS);
+			continue;
+			}
 			// 将背景与掩码相或，边保留，图像区域为 1
 			m_dcMem.BitBlt(nLeft + j * nElemW, nTop + i * nElemH, nElemW, nElemH,
 				&m_dcMask, 0, nElemVal * nElemH, SRCPAINT);
@@ -170,9 +187,86 @@ void CGameDlg::UpdateMap(void)
 	}
 }
 
+void CGameDlg::DrawTipFrame(int nRow, int nCol) {
+	CClientDC dc(this);//选定当前画图环境
+	CPen pen(PS_SOLID, 2, RGB(255,0,0));//做一支红色粗细为2的笔
+	CPen* pOldPen = dc.SelectObject(&pen);
+	int left = m_ptGameTop.x + nCol*m_sizeElem.cx;
+	int top = m_ptGameTop.y + nRow*m_sizeElem.cy;
+	int right = left + m_sizeElem.cx;
+	int bottom = top + m_sizeElem.cy;
+	dc.MoveTo(left,top);
+	dc.LineTo(left,bottom);
+	dc.LineTo(right,bottom);
+	dc.LineTo(right,top);
+	dc.LineTo(left,top);
+	dc.SelectObject(pOldPen);
+}
+
+//画连接线
+void CGameDlg::DrawTipLine(Vertex asvPath[4], int nVexnum) {
+	CClientDC ndc(this);
+	CPen penLine(PS_SOLID, 2, RGB(0, 255, 0));
+	CPen* pPen = ndc.SelectObject(&penLine);
+	ndc.MoveTo(m_ptGameTop.x + asvPath[0].col * m_sizeElem.cx + m_sizeElem.cx / 2,
+		m_ptGameTop.y + asvPath[0].row * m_sizeElem.cy + m_sizeElem.cy / 2);
+	for (int i = 1; i < nVexnum; i++)
+	{
+		ndc.LineTo(m_ptGameTop.x + asvPath[i].col * m_sizeElem.cx + m_sizeElem.cx / 2,
+			m_ptGameTop.y + asvPath[i].row * m_sizeElem.cy + m_sizeElem.cy / 2);
+	}
+	ndc.SelectObject(pPen);
+}
+
 void CGameDlg::OnClickedBtnStart()
 {
 	m_GameC.StartGame();
 	UpdateMap();
 	Invalidate();
+	GetDlgItem(IDC_BTN_START)->EnableWindow(FALSE);
+}
+
+void CGameDlg::OnLButtonUp(UINT nFlags, CPoint point)
+{
+
+	Vertex avPath[4]; int nVexnum;
+
+	// 判断鼠标点击的区域
+	if (point.y < m_rtGameRect.top || point.y > m_rtGameRect.bottom || point.x < m_rtGameRect.left || point.x > m_rtGameRect.right)
+	{
+		return CDialogEx::OnLButtonUp(nFlags, point);
+	}
+	else {
+		int nCol = (point.x - m_ptGameTop.x) / m_sizeElem.cx;
+		int nRow = (point.y - m_ptGameTop.y) / m_sizeElem.cy;
+		if (m_bFirstPoint) // 第一个点
+		{
+			m_GameC.SetFirstPoint(nRow,nCol);
+			if (m_GameC.GetElement(nRow, nCol) != BLANK) DrawTipFrame(nRow, nCol);
+		}
+		else if(m_GameC.GetElement(nRow,nCol)!=BLANK)// 第二个点
+		{
+			DrawTipFrame(nRow, nCol);
+			m_GameC.SetSecPoint(nRow, nCol);
+			// 连子判断
+			bool bSuc = m_GameC.Link(avPath, nVexnum);
+			if (bSuc == true)
+			{
+				// 画提示线
+				DrawTipLine(avPath, nVexnum);
+				Sleep(100);
+				// 更新地图
+				UpdateMap();
+				InvalidateRect(m_rtGameRect,0);
+				
+			}
+			else {
+				// 更新地图
+				UpdateMap();
+				InvalidateRect(m_rtGameRect);
+			}
+		}
+		m_bFirstPoint = !m_bFirstPoint;
+		return CDialogEx::OnLButtonUp(nFlags, point);
+	}
 }
