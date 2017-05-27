@@ -279,3 +279,15 @@ void CGameLogic::Clear(int** pGameMap, Vertex v1, Vertex v2) {
 	pGameMap[v1.row][v1.col] = BLANK;
 	pGameMap[v2.row][v2.col] = BLANK;
 }
+
+//ÅÐ¶ÏÊÇ·ñÎª¿Õ
+bool CGameLogic::IsBlank(int** pGameMap) {
+	int nRow = CGameControl::s_nRows;
+	int nCol = CGameControl::s_nCols;
+	for (int i = 0; i < nRow; i++) {
+		for (int j = 0; j < nCol; j++) {
+			if (pGameMap[i][j] != BLANK) return false;
+		}
+	}
+	return true;
+}

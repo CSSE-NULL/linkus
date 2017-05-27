@@ -58,3 +58,7 @@ void CGameControl::SetSecPoint(int nRow, int nCol) {
 	m_svSelSec.col = nCol;
 	m_svSelSec.info = GetElement(nRow, nCol);
 }
+
+bool CGameControl::IsWin(void) {
+	return m_GameLogic.IsBlank(m_pGameMap);
+}

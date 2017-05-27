@@ -21,4 +21,5 @@ public:
 	void PopVertex(); //取出一个顶点
 	void ClearStack(); //清除栈
 	bool TwoCornerLink(int** pGameMap, Vertex v1, Vertex v2); //三条直线消子判断
+	bool IsBlank(int** pGameMap); // 判断图中顶点是不是全为空
 };

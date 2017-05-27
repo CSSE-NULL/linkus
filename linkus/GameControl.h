@@ -17,5 +17,6 @@ public:
 	void SetFirstPoint(int nRow, int nCol); // 设置第一个点
 	void SetSecPoint(int nRow, int nCol); // 设置第二个点
 	bool Link(Vertex avPath[4], int &nVexnum); // 消子判断(路径暂定为 2 个顶点，后面再对该函数进行修订)
+	bool IsWin(void); // 判断是否获胜
 };
 

@@ -45,6 +45,12 @@
     <ClInclude Include="global.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="WinDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LoseDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="linkus.cpp">
@@ -63,6 +69,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="GameControl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="WinDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LoseDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -90,6 +102,12 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="res\bg2.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\win.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\lose.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>
