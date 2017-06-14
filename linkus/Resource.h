@@ -15,8 +15,10 @@
 #define IDB_BITMAP1                     146
 #define IDB_WIN_BG                      146
 #define IDD_LOSE_DIALOG                 147
-#define IDB_LSOE_BG                     149
 #define IDB_LOSE_BG                     149
+#define IDD_RELAX_DIALOG                152
+#define IDB_GAME2_BG                    155
+#define IDD_THEME_DIALOG                156
 #define IDC_BTN_BASIC                   1000
 #define IDC_BTN_RELAX                   1001
 #define IDC_BTN_LEVEL                   1002
@@ -35,14 +37,25 @@
 #define IDC_SETTING                     1011
 #define IDC_TIME_PROGRESS               1014
 #define IDC_PERCENT                     1015
+#define IDC_BTN_RELAX_START             1016
+#define IDC_RELAX_PAUSE                 1017
+#define IDC_RELAX_TIP                   1018
+#define IDC_BTN_RELAX_REARRANGE         1019
+#define IDC_RELAX_SETTING               1020
+#define IDC_RELAX_HELP                  1021
+#define IDC_LEVEL                       1022
+#define IDC_FRUIT                       1024
+#define IDC_ANIMAL                      1025
+#define ID_OK                           1026
+#define IDC_CONFIRM                     1026
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        150
+#define _APS_NEXT_RESOURCE_VALUE        158
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1016
+#define _APS_NEXT_CONTROL_VALUE         1027
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

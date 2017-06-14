@@ -7,10 +7,12 @@
 #include "linkusDlg.h"
 #include "afxdialogex.h"
 #include "GameDlg.h"
+#include "ThemeDlg.h"
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
+int ClinkusDlg::theme = 0; //默认主题为水果
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
 
@@ -23,7 +25,6 @@ public:
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
-
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 支持
 
@@ -42,6 +43,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
+	ON_WM_PAINT()
 END_MESSAGE_MAP()
 
 
@@ -66,6 +68,11 @@ BEGIN_MESSAGE_MAP(ClinkusDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 //	ON_BN_CLICKED(IDC_BTN_RELAX, &ClinkusDlg::OnBnClicked_BTN_RELAX)
 	ON_BN_CLICKED(IDC_BTN_BASIC, &ClinkusDlg::OnClickedBtnBasic)
+	ON_BN_CLICKED(IDC_BTN_RELAX, &ClinkusDlg::OnClickedBtnRelax)
+	ON_BN_CLICKED(IDC_BTN_LEVEL, &ClinkusDlg::OnClickedBtnLevel)
+	ON_BN_CLICKED(IDC_BTN_HELP, &ClinkusDlg::OnClickedBtnHelp)
+	ON_BN_CLICKED(IDC_BTN_RANK, &ClinkusDlg::OnClickedBtnRank)
+	ON_BN_CLICKED(IDC_BTN_SETTING, &ClinkusDlg::OnClickedBtnSetting)
 END_MESSAGE_MAP()
 
 
@@ -199,3 +206,44 @@ void ClinkusDlg::OnClickedBtnBasic()
 	ShowWindow(SW_SHOW);
 }
 
+
+
+void ClinkusDlg::OnClickedBtnRelax()
+{
+;
+	CGameDlg dlg(NULL,1);
+	ShowWindow(SW_HIDE);
+	dlg.DoModal();
+	ShowWindow(SW_SHOW);
+}
+
+
+void ClinkusDlg::OnClickedBtnLevel()
+{
+	CGameDlg dlg(NULL, 2);
+	ShowWindow(SW_HIDE);
+	dlg.DoModal();
+	ShowWindow(SW_SHOW);
+}
+
+void ClinkusDlg::OnClickedBtnHelp()
+{
+	MessageBox(_T("关于三种模式：\
+一. 基本模式：时限300秒，规定时间内完成即可胜利 \
+二. 休闲模式：无时间限制\
+三, 关卡模式: 总共七关，每一关的图片数量和种类比前一关多，时间也比前一关多10秒"
+), _T("帮助"), MB_OK);
+}
+
+
+void ClinkusDlg::OnClickedBtnRank()
+{
+	MessageBox(_T("你是第一，不用看了^_^"), _T("排行榜"), MB_OK);
+}
+
+
+void ClinkusDlg::OnClickedBtnSetting()
+{
+	CThemeDlg dlg;
+	dlg.DoModal();
+}

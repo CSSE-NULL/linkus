@@ -3,13 +3,12 @@
 //
 
 #pragma once
-
-
 // ClinkusDlg 对话框
 class ClinkusDlg : public CDialogEx
 {
 // 构造
 public:
+	static int theme; //设置主题
 	ClinkusDlg(CWnd* pParent = NULL);	// 标准构造函数
 
 // 对话框数据
@@ -37,4 +36,9 @@ protected:
 public:
 //	afx_msg void OnBnClicked_BTN_RELAX();
 	afx_msg void OnClickedBtnBasic();
+	afx_msg void OnClickedBtnRelax();
+	afx_msg void OnClickedBtnLevel();
+	afx_msg void OnClickedBtnHelp();
+	afx_msg void OnClickedBtnRank();
+	afx_msg void OnClickedBtnSetting();
 };

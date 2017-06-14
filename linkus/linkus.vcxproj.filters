@@ -51,6 +51,9 @@
     <ClInclude Include="LoseDlg.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ThemeDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="linkus.cpp">
@@ -75,6 +78,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="LoseDlg.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ThemeDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -108,6 +114,12 @@
       <Filter>资源文件</Filter>
     </Image>
     <Image Include="res\lose.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\bitmap2.bmp">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="res\animal.bmp">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

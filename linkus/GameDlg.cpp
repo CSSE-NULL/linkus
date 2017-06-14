@@ -3,15 +3,18 @@
 
 #include "stdafx.h"
 #include "linkus.h"
+#include "linkusDlg.h"
 #include "GameDlg.h"
 #include "afxdialogex.h"
 // CGameDlg 对话框
+int CGameDlg::level = 1;
 
 IMPLEMENT_DYNAMIC(CGameDlg, CDialogEx)
 
-CGameDlg::CGameDlg(CWnd* pParent /*=NULL*/)
+CGameDlg::CGameDlg(CWnd* pParent,int md)
 	: CDialogEx(IDD_GAME_DIALOG, pParent)
 {
+	mode = md;
 	m_ptGameTop.x = 50;
 	m_ptGameTop.y = 50;
 	m_sizeElem.cx = 40;
@@ -23,6 +26,8 @@ CGameDlg::CGameDlg(CWnd* pParent /*=NULL*/)
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 	m_bFirstPoint = true;
 	m_bPlaying = false;
+	level = 1;
+	m_bPause = false;
 }
 
 CGameDlg::~CGameDlg()
@@ -33,6 +38,7 @@ void CGameDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TIME_PROGRESS, m_pro);
+	DDX_Control(pDX, IDC_LEVEL, m_level);
 }
 
 
@@ -46,6 +52,7 @@ BEGIN_MESSAGE_MAP(CGameDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_TIP, &CGameDlg::OnClickedTip)
 	ON_BN_CLICKED(IDC_SETTING, &CGameDlg::OnClickedSetting)
 	ON_BN_CLICKED(IDC_HELP, &CGameDlg::OnClickedHelp)
+	ON_WM_CTLCOLOR(IDC_LEVEL,&CGameDlg::OnCtlColor)
 END_MESSAGE_MAP()
 
 
@@ -53,7 +60,7 @@ END_MESSAGE_MAP()
 void CGameDlg::InitBackground(void)
 {
 	CBitmap bmpMain;
-	bmpMain.LoadBitmapW(IDB_GAME_BG);
+	bmpMain.LoadBitmapW(bkg);
 
 	// 获得当前对话框的视频内存
 	CClientDC dc(this);
@@ -114,9 +121,32 @@ HCURSOR CGameDlg::OnQueryDragIcon()
 BOOL CGameDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog(); 
+	PlaySound(L"E:\\Algorithms\\算法实验\\linkus\\linkus\\res\\bkg.wav", NULL, SND_FILENAME | SND_ASYNC);
+
+	switch (mode)//设置不同模式下的标题
+	{
+	case 0:
+		this->SetWindowText(_T("欢乐连连看——基本模式"));
+		break;
+	case 1:
+		this->SetWindowText(_T("欢乐连连看——休闲模式"));
+		break;
+	case 2:
+		this->SetWindowText(_T("欢乐连连看——关卡模式"));
+		break;
+	default:
+		break;
+	}
+	SetTheme();//设置主题
+	m_GameC.s_nPicNum = 20;//以下三条设置目的是退出关卡模式后不影响其他模式
+	m_GameC.s_nRows = 10;
+	m_GameC.s_nCols = 16;
+	m_font.CreatePointFont(150, L"华文行楷");//设置字体
+	m_brush.CreateSolidBrush(RGB(0, 126, 202));
 	GetDlgItem(IDC_PAUSE)->EnableWindow(FALSE);
 	GetDlgItem(IDC_TIP)->EnableWindow(FALSE);
 	GetDlgItem(IDC_BTN_REARRANGE)->EnableWindow(FALSE);
+	GetDlgItem(IDC_LEVEL)->ShowWindow(SW_HIDE);//隐藏关卡显示
 	m_nMax = 300;
 	m_nStep = 1;
 	m_pro.SetRange(0, m_nMax);//进度条范围
@@ -126,7 +156,7 @@ BOOL CGameDlg::OnInitDialog()
 	InitElement();
 	UpdateWindow();
 	SetIcon(m_hIcon, TRUE);			// 设置大图标
-	SetIcon(m_hIcon, FALSE);		// 设置小图标
+	SetIcon(m_hIcon, TRUE);		// 设置小图标
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // 异常: OCX 属性页应返回 FALSE
@@ -154,19 +184,12 @@ void CGameDlg::InitElement(void)
 	// 获得当前对话框的视频内存
 	CClientDC dc(this);
 	// 加载 BMP 图片资源
-	HANDLE hBmp = ::LoadImageW(NULL, _T("theme\\picture\\fruit_element.bmp"),
+	HANDLE hBmp = ::LoadImageW(NULL, elem,
 		IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	// 创建与视频内存兼容的内存 DC
 	m_dcElement.CreateCompatibleDC(&dc);
 	// 将位图资源选入 DC
 	m_dcElement.SelectObject(hBmp);
-	// 加载掩码 BMP 图片资源
-	HANDLE hMask = ::LoadImageW(NULL, _T("theme\\picture\\fruit_mask.bmp"),
-		IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	// 创建与视频内存兼容的内存 DC
-	m_dcMask.CreateCompatibleDC(&dc);
-	// 将位图资源选入 DC
-	m_dcMask.SelectObject(hMask);
 }
 
 void CGameDlg::UpdateMap(void)
@@ -256,17 +279,29 @@ void CGameDlg::Rearrange() {
 
 void CGameDlg::OnClickedBtnStart()
 {
-	if (!m_bPlaying) {  //刚开始游戏
+	if (!m_bPlaying && !m_bPause) {  //刚开始游戏时
+		if (mode == 2) {
+			SetLevel();
+		}
 		m_GameC.StartGame();
 		UpdateMap();
 		Invalidate();
 		SetTimer(1, 1000, NULL);//设置进度条更新时钟
 		m_bPlaying = true;
-		GetDlgItem(IDC_TIME_PROGRESS)->ShowWindow(SW_SHOW);
-		GetDlgItem(IDC_PERCENT)->ShowWindow(SW_SHOW);
-	}
-	else {
-		SetTimer(1, 1000, NULL);//设置进度条更新时钟	
+		if (mode != 1) {
+			GetDlgItem(IDC_TIME_PROGRESS)->ShowWindow(SW_SHOW);
+			GetDlgItem(IDC_PERCENT)->ShowWindow(SW_SHOW);
+		}
+		else{
+			GetDlgItem(IDC_TIME_PROGRESS)->ShowWindow(SW_HIDE);
+			GetDlgItem(IDC_PERCENT)->ShowWindow(SW_HIDE);
+		}
+		}
+		
+	else { //当是从暂停游戏恢复时
+		SetTimer(1, 1000, NULL);//设置进度条更新时钟
+		m_bPause = false;
+		m_bPlaying = true;
 	}
 	//关闭开始游戏按钮，打开其他按钮
 	GetDlgItem(IDC_BTN_START)->EnableWindow(FALSE);
@@ -279,20 +314,14 @@ void CGameDlg::OnLButtonUp(UINT nFlags, CPoint point)
 {
 
 	Vertex avPath[4]; int nVexnum;
+	//当游戏正在进行中（未暂停或结束）
+	if (m_bPlaying) {
 	// 判断鼠标点击的区域
 	if (point.y < m_rtGameRect.top || point.y > m_rtGameRect.bottom || point.x < m_rtGameRect.left || point.x > m_rtGameRect.right)
 	{
 		return CDialogEx::OnLButtonUp(nFlags, point);
 	}
 	else{
-		if (m_GameC.IsWin()) {  //已经胜利时处理(进度条没有走完)
-			m_bPlaying = false;
-			GetDlgItem(IDC_BTN_START)->EnableWindow(TRUE);
-			KillTimer(1);
-			CWinDlg dlg;
-			dlg.DoModal();
-
-		}
 		int nCol = (point.x - m_ptGameTop.x) / m_sizeElem.cx;
 		int nRow = (point.y - m_ptGameTop.y) / m_sizeElem.cy;
 		if (m_bFirstPoint) // 第一个点
@@ -311,20 +340,34 @@ void CGameDlg::OnLButtonUp(UINT nFlags, CPoint point)
 				// 画提示线
 				DrawTipLine(avPath, nVexnum);
 				Sleep(100);
-				// 更新地图
-				UpdateMap();
-				InvalidateRect(m_rtGameRect,0);
-				
+				if (m_GameC.IsWin() ) {  //已经胜利时处理(进度条没有走完)
+					GetDlgItem(IDC_BTN_START)->EnableWindow(TRUE);
+					m_pro.SetPos(0);
+					KillTimer(1);
+					if (mode == 2) {  //当为关卡模式时
+						m_bPlaying = true;//游戏未结束，进入下一关
+						level++;
+						SetLevel();
+						GetDlgItem(IDC_BTN_START)->EnableWindow(FALSE);
+						UpdateMap();
+						InvalidateRect(m_rtGameRect, 0);
+					}
+					else {//当为普通模式时
+						m_bPlaying = false;
+						CWinDlg dlg;
+						dlg.DoModal();
+					}
+				}
 			}
-			else {
 				// 更新地图
 				UpdateMap();
 				InvalidateRect(m_rtGameRect);
-			}
 		}
 		m_bFirstPoint = !m_bFirstPoint;
 		return CDialogEx::OnLButtonUp(nFlags, point);
 	}
+	}
+
 
 }
 
@@ -358,7 +401,8 @@ void CGameDlg::OnTimer(UINT_PTR nIDEvent)
 
 void CGameDlg::OnClickedPause()
 {
-	m_bPlaying = true;
+	m_bPlaying = false;
+	m_bPause = true;
 	GetDlgItem(IDC_BTN_START)->EnableWindow(TRUE);
 	GetDlgItem(IDC_PAUSE)->EnableWindow(FALSE);
 	GetDlgItem(IDC_TIP)->EnableWindow(FALSE);
@@ -366,6 +410,7 @@ void CGameDlg::OnClickedPause()
 	KillTimer(1);
 }
 
+//响应提示按钮
 void CGameDlg::OnClickedTip()
 {
 	int nRows = CGameControl::s_nRows;
@@ -374,16 +419,18 @@ void CGameDlg::OnClickedTip()
 
 	for (int i = 0; i < nRows-1; i++)
 	{
-		if (!islink) {
+		if (!islink) { //当未出现相邻可相连的情况时，持续搜索直至找完所有图片
 			for (int j = 0; j < nCols - 1; j++)
 			{
 				if (!islink) {
+					//当横向相邻时，画提示框并置变量为真以结束循环
 					if (m_GameC.GetElement(i, j) != BLANK && m_GameC.GetElement(i, j) == m_GameC.GetElement(i , j+1)) {//当横向可消时
 						DrawTipFrame(i, j);
 						DrawTipFrame(i, j+1);
 						Sleep(100);
 						islink = true;
 					}
+					//当纵向相邻时，画提示框并置变量为真以结束循环
 					else if (m_GameC.GetElement(i, j) != BLANK && m_GameC.GetElement(i, j) == m_GameC.GetElement(i+1, j)) {//当纵向可消时
 						DrawTipFrame(i, j);
 						DrawTipFrame(i+1, j );
@@ -402,10 +449,85 @@ void CGameDlg::OnClickedTip()
 
 void CGameDlg::OnClickedSetting()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	MessageBox(_T("无需额外设置"),_T("设置"),MB_OK);
 }
 
 void CGameDlg::OnClickedHelp()
 {
-	// TODO: 在此添加控件通知处理程序代码
+	MessageBox(_T("点击两张同样的图片，能用三条线以下连接均可消除（边界除外）"),_T("帮助"), MB_OK);
+}
+
+HBRUSH CGameDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	if (m_level.m_hWnd == pWnd->m_hWnd)
+	{
+		pDC->SetBkColor(RGB(0, 126, 202));
+		pDC->SelectObject(&m_font);
+		return m_brush;
+	}
+	return hbr;
+}
+
+//设置相关关卡的内容信息
+void CGameDlg::SetLevel() {
+	if (level <= 7) {
+		if (level % 2 != 0) {//当level为奇数时，将行列设置为偶数
+			CGameControl::s_nRows = 3 + level;
+			CGameControl::s_nCols = 9 + level;
+		}
+		else { //当level为偶数时，将行列设置为偶数以防无法形成游戏界面（成对图片个数不为整数）
+			CGameControl::s_nRows = 4 + level;
+			CGameControl::s_nCols = 10 + level;
+		}
+
+
+	for (int i = level + 4; i <= 20; i++) {
+		if ((CGameControl::s_nRows*CGameControl::s_nCols) % (i * 2) == 0) {
+			m_GameC.s_nPicNum = i;
+			wchar_t test[10];
+			wsprintf(test, L"第%d关", level);
+			GetDlgItem(IDC_LEVEL)->SetWindowText(test);
+			GetDlgItem(IDC_LEVEL)->ShowWindow(SW_SHOW);
+			m_nMax = 60 + 10 * level;
+			m_pro.SetRange(0, m_nMax);//进度条范围
+			break;
+		}
+
+	}
+	m_GameC.StartGame();
+	UpdateMap();
+	Invalidate();
+	SetTimer(1, 1000, NULL);//设置进度条更新时钟
+	m_bPlaying = true;
+	}
+	else {
+		MessageBox(_T("恭喜通关！"),_T("通关"));
+		m_bPlaying = false;
+	}
+
+
+}
+
+
+//设置主题
+void CGameDlg::SetTheme() {
+	int theme = ClinkusDlg::theme;
+	switch (theme)
+	{
+	case 0:
+	{
+		wsprintf(elem,_T("theme\\picture\\fruit_element.bmp"));
+		bkg = IDB_GAME_BG;
+		break;
+	}
+	case 1:
+	{
+		wsprintf(elem, _T("theme\\picture\\animal_element.bmp"));
+		bkg = IDB_GAME2_BG;
+		break;
+	}
+	default:
+		break;
+	}
 }

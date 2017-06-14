@@ -7,4 +7,3 @@ typedef struct tagVertex {
 	int col; // 列
 	int info; // 信息类
 }Vertex;
-

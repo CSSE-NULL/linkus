@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "GameLogic.h"
 #include "GameControl.h"
+#include "GameDlg.h"
 
 CGameLogic::CGameLogic()
 {
